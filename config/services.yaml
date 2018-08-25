@@ -34,15 +34,6 @@ services:
         arguments:
             - '@app.repo_identifier_decoder'
 
-    App\Service\ApiDataRetriever:
-        arguments:
-            - '@app.github_api_caller'
-
-    app.github_api_caller:
-        class: App\Service\GithubApiCaller
-        arguments:
-            - '%app.github_api_url%'
-
     app.repo_identifier_decoder:
         class: App\Validator\RepoIdentifierDecoder
 
@@ -63,5 +54,3 @@ services:
     app.api_data_retriever:
         class: App\Service\ApiDataRetriever
         public: true
-        arguments:
-            - '@app.github_api_caller'

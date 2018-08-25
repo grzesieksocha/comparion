@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace App\Resource;
 
@@ -24,6 +24,4 @@ class RepositoryComparison
     {
         return $this->repositoryTwo;
     }
-
-
 }

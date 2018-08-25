@@ -2,10 +2,10 @@
 
 namespace App\Factory;
 
-use App\Resource\Repository;
-use App\Service\Fields;
-use App\Validator\RepoIdentifierDecoder;
 use Psr\Log\InvalidArgumentException;
+
+use App\Resource\Repository;
+use App\Validator\RepoIdentifierDecoder;
 
 class RepositoryFactory
 {

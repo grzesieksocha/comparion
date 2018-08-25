@@ -3,6 +3,7 @@
 namespace App\Service;
 
 use App\Resource\Repository;
+
 use Github\Api\PullRequest;
 use Github\Api\Repo;
 use Github\Client;
@@ -10,14 +11,10 @@ use Github\ResultPager;
 
 class ApiDataRetriever
 {
-    /** @var GithubApiCaller */
-    private $githubApiCaller;
     private $client;
 
-    public function __construct(GithubApiCaller $githubApiCaller)
+    public function __construct()
     {
-        $this->githubApiCaller = $githubApiCaller;
-
         $client = new Client();
         $client->authenticate(getenv('GITHUB_SECRET'), getenv('GITHUB_SECRET'), getenv('GITHUB_AUTH_METHOD'));
         $this->client = $client;
@@ -35,6 +32,7 @@ class ApiDataRetriever
     {
         $this->setBasicData($repository);
         $this->setPullRequestData($repository);
+        $this->setLatestRelease($repository);
     }
 
     /**
@@ -71,6 +69,21 @@ class ApiDataRetriever
             'open_pr' => count($openPullRequests),
             'closed_pr' => count($closedPullRequests)
         ];
+        $this->setData($repository, $data, $fields);
+    }
+
+    /**
+     * @param Repository[] $repositories
+     */
+    private function setLatestRelease(Repository $repository) : void
+    {
+        $fields = new Fields();
+        $fields->addField(Fields::LATEST_RELEASE);
+
+        /** @var Repo $api */
+        $api = $this->client->api('repo');
+        $data = $api->releases()->all($repository->getOwner(), $repository->getName());
+        $data = ['latest_release' => $data[0]['published_at']];
         $this->setData($repository, $data, $fields);
     }
 
