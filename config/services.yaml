@@ -30,16 +30,10 @@ services:
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
 
-    app.github_api_caller:
-        class: App\Service\GithubApiCaller
+    App\Factory\RepositoryFactory:
         arguments:
-            - '%app.github_api_url%'
+            - '@app.repo_identifier_decoder'
 
     app.repo_identifier_decoder:
         class: App\Validator\RepoIdentifierDecoder
 
-    app.repo_factory:
-        class: App\Factory\RepositoryFactory
-
-    app.json_object_serializer:
-        class: App\Service\JsonObjectSerializer

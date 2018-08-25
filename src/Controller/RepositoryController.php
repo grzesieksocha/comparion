@@ -10,7 +10,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 use App\Service\JsonObjectSerializer;
-use App\Validator\RepoIdentifierDecoder;
 use App\Resource\Repository;
 use App\Criteria\PullCriteria;
 use App\Criteria\RepositoryCriteria;
@@ -26,21 +25,19 @@ use App\Validator\ParametersResolver;
 class RepositoryController
 {
     /**
-     * @Route("/repository/{encodedIdentifier}", methods={"GET"}, name="get_repository", requirements={"encodedIdentifier"=".+"})
+     * @Route("/repository/{identifier}", methods={"GET"}, name="get_repository", requirements={"identifier"=".+"})
      */
     public function getRepositoryAction(
-        $encodedIdentifier,
-        RepoIdentifierDecoder $repoIdentifierDecoder,
+        $identifier,
         RepositoryFactory $repositoryFactory,
         JsonObjectSerializer $jsonObjectSerializer)
     {
-        $repoIdentifier = $repoIdentifierDecoder->decode($encodedIdentifier);
-        if (false === $repoIdentifier) {
-            return $this->getBadRequestResponse('Invalid repository identifier (url encoded name / link required)');
+        try {
+            $repository = $repositoryFactory->getRepository($identifier);
+            $serializedRepository = $jsonObjectSerializer->serialize($repository);
+        } catch (\Exception $e) {
+            return $this->getBadRequestResponse($e->getMessage());
         }
-
-        $repository = $repositoryFactory->getRepository($repoIdentifier);
-        $serializedRepository = $jsonObjectSerializer->serialize($repository);
 
         return $this->getSuccessResponse($serializedRepository);
     }
