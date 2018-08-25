@@ -38,7 +38,7 @@ class Repository
         return $this->fields;
     }
 
-    public function addField(string $name, $value)
+    public function addField($name, $value)
     {
         $this->fields[$name] = $value;
     }
