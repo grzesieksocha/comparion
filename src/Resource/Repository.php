@@ -6,7 +6,6 @@ class Repository
 {
     private $owner;
     private $name;
-
     private $fields = [];
 
     /**
@@ -34,10 +33,7 @@ class Repository
         return $this->name;
     }
 
-    /**
-     * @return array
-     */
-    public function getFields()
+    public function getFields() : array
     {
         return $this->fields;
     }

@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-use App\Resource\ApiResponse;
+use App\Api\ApiResponse;
 
 class GithubApiCaller
 {

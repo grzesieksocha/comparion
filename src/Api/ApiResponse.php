@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace App\Resource;
+namespace App\Api;
 
 class ApiResponse
 {

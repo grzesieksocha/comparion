@@ -10,13 +10,15 @@ class ApiDataRetriever
 {
     /** @var GithubApiCaller */
     private $githubApiCaller;
-    /** @var RepositoryFactory */
-    private $repositoryFactory;
 
-    public function __construct(GithubApiCaller $githubApiCaller, RepositoryFactory $repositoryFactory)
+    public function __construct(GithubApiCaller $githubApiCaller)
     {
         $this->githubApiCaller = $githubApiCaller;
-        $this->repositoryFactory = $repositoryFactory;
+    }
+
+    public function fill(Repository $repository)
+    {
+
     }
 
     /**
@@ -24,7 +26,7 @@ class ApiDataRetriever
      * @param CriteriaInterface $criteria
      * @param Fields $fields
      */
-    public function fill(array $repositories, CriteriaInterface $criteria, Fields $fields)
+    public function fillOld(array $repositories, CriteriaInterface $criteria, Fields $fields)
     {
         foreach ($repositories as $repository) {
             $uri = $criteria->getUri($repository->getOwner(), $repository->getName());

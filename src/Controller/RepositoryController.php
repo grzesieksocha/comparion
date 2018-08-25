@@ -13,7 +13,7 @@ use App\Service\JsonObjectSerializer;
 use App\Resource\Repository;
 use App\Criteria\PullCriteria;
 use App\Criteria\RepositoryCriteria;
-use App\Resource\ComparisonFactory;
+use App\Factory\ComparisonFactory;
 use App\Factory\RepositoryFactory;
 use App\Service\ApiDataRetriever;
 use App\Service\Fields;
@@ -24,16 +24,33 @@ use App\Validator\ParametersResolver;
  */
 class RepositoryController
 {
+    /** @var RepositoryFactory */
+    private $repositoryFactory;
+    /** @var ComparisonFactory */
+    private $comparisonFactory;
+    /** @var JsonObjectSerializer */
+    private $jsonObjectSerializer;
+
     /**
      * @Route("/repository/{identifier}", methods={"GET"}, name="get_repository", requirements={"identifier"=".+"})
      */
     public function getRepositoryAction(
-        $identifier,
+        string $identifier,
+        Request $request,
         RepositoryFactory $repositoryFactory,
+        ComparisonFactory $comparisonFactory,
+        ApiDataRetriever $apiDataRetriever,
         JsonObjectSerializer $jsonObjectSerializer)
     {
+        $this->repositoryFactory = $repositoryFactory;
+        $this->comparisonFactory = $comparisonFactory;
+        $this->jsonObjectSerializer = $jsonObjectSerializer;
         try {
             $repository = $repositoryFactory->getRepository($identifier);
+            if ($request->query) {
+                return $this->processCompareRequest($repository, $request->query);
+            }
+            $apiDataRetriever->fill($repository);
             $serializedRepository = $jsonObjectSerializer->serialize($repository);
         } catch (\Exception $e) {
             return $this->getBadRequestResponse($e->getMessage());
@@ -150,5 +167,13 @@ class RepositoryController
         $response->headers->set('Content-Type', 'application/json');
 
         return $response;
+    }
+
+    private function processCompareRequest(Repository $repositoryOne, ParameterBag $query)
+    {
+        $repositoryTwo = $this->repositoryFactory->getRepository($query->get('compare'));
+        $comparison = $this->comparisonFactory->compare($repositoryOne, $repositoryTwo);
+        $serializedComparison = $this->jsonObjectSerializer->serialize($comparison);
+        return $this->getSuccessResponse($serializedComparison);
     }
 }
