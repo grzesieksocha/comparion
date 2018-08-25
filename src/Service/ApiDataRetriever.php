@@ -16,7 +16,9 @@ class ApiDataRetriever
     public function __construct()
     {
         $client = new Client();
-        $client->authenticate(getenv('GITHUB_SECRET'), getenv('GITHUB_SECRET'), getenv('GITHUB_AUTH_METHOD'));
+        if ('true' === getenv('GITHUB_AUTH_ENABLED')) {
+            $client->authenticate(getenv('GITHUB_SECRET'), getenv('GITHUB_SECRET'), getenv('GITHUB_AUTH_METHOD'));
+        }
         $this->client = $client;
     }
 
