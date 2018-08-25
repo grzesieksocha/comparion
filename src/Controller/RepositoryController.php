@@ -4,9 +4,11 @@ namespace App\Controller;
 
 use Psr\Log\InvalidArgumentException;
 
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
 use App\Resource\Repository;
@@ -21,8 +23,18 @@ use App\Validator\ParametersResolver;
 /**
  * @Route("/api")
  */
-class ComparisonController
+class RepositoryController
 {
+    use ContainerAwareTrait;
+
+    /**
+     * @Route("/repository/{encodedIdentifier}", methods={"GET"}, name="get_repository")
+     */
+    public function getRepositoryAction($encodedIdentifier)
+    {
+        $this->container->get('app.repo_identifier_decoder')->decode($encodedIdentifier);
+    }
+
     /**
      * @Route("/repository_comparison/by_repository", methods={"GET"}, name="compare_by_repository")
      */

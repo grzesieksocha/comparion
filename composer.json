@@ -7,13 +7,16 @@
         "ext-iconv": "*",
         "sensio/framework-extra-bundle": "^5.2",
         "symfony/console": "^4.1",
+        "symfony/dependency-injection": "^4.1",
         "symfony/flex": "^1.0",
         "symfony/framework-bundle": "^4.1",
         "symfony/lts": "^4@dev",
+        "symfony/serializer": "^4.1",
         "symfony/yaml": "^4.1"
     },
     "require-dev": {
         "symfony/dotenv": "^4.1",
+        "symfony/phpunit-bridge": "^4.1",
         "symfony/web-server-bundle": "^4.1"
     },
     "config": {
