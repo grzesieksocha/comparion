@@ -54,3 +54,9 @@ services:
     app.api_data_retriever:
         class: App\Service\ApiDataRetriever
         public: true
+        arguments:
+            - '@github.client'
+
+    github.client:
+        class: Github\Client
+        public: true

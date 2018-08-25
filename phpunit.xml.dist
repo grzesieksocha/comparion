@@ -17,6 +17,7 @@
         <!-- define your env variables for the test env here -->
 
         <!-- ###+ knplabs/github-api ### -->
+        <env name="GITHUB_AUTH_ENABLED" value="false"/>
         <env name="GITHUB_AUTH_METHOD" value="http_password"/>
         <env name="GITHUB_USERNAME" value="username"/>
         <env name="GITHUB_SECRET" value="password_or_token"/>

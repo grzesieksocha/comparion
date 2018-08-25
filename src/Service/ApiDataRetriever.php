@@ -13,24 +13,15 @@ class ApiDataRetriever
 {
     private $client;
 
-    public function __construct()
+    public function __construct(Client $client)
     {
-        $client = new Client();
         if ('true' === getenv('GITHUB_AUTH_ENABLED')) {
             $client->authenticate(getenv('GITHUB_SECRET'), getenv('GITHUB_SECRET'), getenv('GITHUB_AUTH_METHOD'));
         }
         $this->client = $client;
     }
 
-    public function fill(Repository $repository)
-    {
-        $this->setRepositoryData($repository);
-    }
-
-    /**
-     * @return Repository[]
-     */
-    private function setRepositoryData(Repository $repository) : void
+    public function fill(Repository $repository) : void
     {
         $this->setBasicData($repository);
         $this->setPullRequestData($repository);
