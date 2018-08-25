@@ -6,8 +6,9 @@ class Fields
 {
     public const FORKS_COUNT = ['fieldName' => 'forks', 'apiField' => 'forks_count'];
     public const STARGAZERS_COUNT = ['fieldName' => 'stars', 'apiField' => 'stargazers_count'];
-    public const UPDATED_AT = ['fieldName' => 'latest_release', 'apiField' => 'updated_at'];
-    public const STATE = ['fieldName' => 'pull_requests', 'apiField' => 'state'];
+    public const UPDATED_AT = ['fieldName' => 'last_update', 'apiField' => 'updated_at'];
+    public const OPEN_PULL_REQUESTS = ['fieldName' => 'open_pull_requests', 'apiField' => 'open_pr'];
+    public const CLOSED_PULL_REQUESTS = ['fieldName' => 'closed_pull_requests', 'apiField' => 'closed_pr'];
 
     private $fields = [];
 

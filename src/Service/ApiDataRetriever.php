@@ -2,19 +2,25 @@
 
 namespace App\Service;
 
-use App\Criteria\CriteriaInterface;
-use App\Criteria\PullCriteria;
-use App\Criteria\RepositoryCriteria;
 use App\Resource\Repository;
+use Github\Api\PullRequest;
+use Github\Api\Repo;
+use Github\Client;
+use Github\ResultPager;
 
 class ApiDataRetriever
 {
     /** @var GithubApiCaller */
     private $githubApiCaller;
+    private $client;
 
     public function __construct(GithubApiCaller $githubApiCaller)
     {
         $this->githubApiCaller = $githubApiCaller;
+
+        $client = new Client();
+        $client->authenticate(getenv('GITHUB_SECRET'), getenv('GITHUB_SECRET'), getenv('GITHUB_AUTH_METHOD'));
+        $this->client = $client;
     }
 
     public function fill(Repository $repository)
@@ -28,7 +34,7 @@ class ApiDataRetriever
     private function setRepositoryData(Repository $repository) : void
     {
         $this->setBasicData($repository);
-//        $this->setPullRequestData($repository);
+        $this->setPullRequestData($repository);
     }
 
     /**
@@ -41,7 +47,10 @@ class ApiDataRetriever
         $fields->addField(Fields::STARGAZERS_COUNT);
         $fields->addField(Fields::UPDATED_AT);
 
-        $this->fillOld($repository, new RepositoryCriteria(), $fields);
+        /** @var Repo $api */
+        $api = $this->client->api('repo');
+        $data = $api->show($repository->getOwner(), $repository->getName());
+        $this->setData($repository, $data, $fields);
     }
 
     /**
@@ -50,63 +59,25 @@ class ApiDataRetriever
     private function setPullRequestData(Repository $repository) : void
     {
         $fields = new Fields();
-        $fields->addField(Fields::STATE);
+        $fields->addField(Fields::OPEN_PULL_REQUESTS);
+        $fields->addField(Fields::CLOSED_PULL_REQUESTS);
 
-        $this->fillOld($repository, new PullCriteria(), $fields);
+        /** @var PullRequest $api */
+        $api = $this->client->api('pull_request');
+        $paginator  = new ResultPager($this->client);
+        $openPullRequests = $paginator->fetchAll($api, 'all', [$repository->getOwner(), $repository->getName(), ['state' => 'open']]);
+        $closedPullRequests = $paginator->fetchAll($api, 'all', [$repository->getOwner(), $repository->getName(), ['state' => 'closed']]);
+        $data = [
+            'open_pr' => count($openPullRequests),
+            'closed_pr' => count($closedPullRequests)
+        ];
+        $this->setData($repository, $data, $fields);
     }
 
-    public function fillOld(Repository $repository, CriteriaInterface $criteria, Fields $fields) : void
-    {
-        $uri = $criteria->getUri($repository->getOwner(), $repository->getName());
-        $apiResponse = $this->githubApiCaller->getData($uri);
-        if ($apiResponse->isEmpty($criteria->getNoResultsConditions())) {
-            return;
-        }
-
-        if ($criteria->resultAsArray()) {
-            $this->setDataFromArray($repository, $apiResponse->getDecodedBody(), $fields, true);
-        } else {
-            $this->setData(
-                $repository,
-                $apiResponse->getBodyProperty($criteria->getItemsProperty())[0], // TODO shouldn't use table index
-                $fields
-            );
-        }
-    }
-
-    public function setData(Repository $repository, $data, Fields $fields)
+    private function setData(Repository $repository, $data, Fields $fields)
     {
         foreach ($fields->getFields() as $property => $field) {
-            $repository->addField($property, $data->{$field});
-        }
-    }
-
-    public function setDataFromArray(Repository $repository, $data, Fields $fields, bool $count)
-    {
-        $result = [];
-        foreach ($data as $datum) {
-            foreach ($fields->getFields() as $field) {
-                if ($count) {
-                    $value = $datum->{$field};
-                    if (isset($result[$field][$value])) {
-                        $result[$field][$value]++;
-                    } else {
-                        $result[$field][$value] = 1;
-                    }
-                } else {
-                    $repository->addField($field, $data->{$field});
-                }
-            }
-        }
-
-        if ($count) {
-            foreach ($fields->getFields() as $field) {
-                $aggregatedFields = [];
-                foreach ($result[$field] as $name => $value) {
-                    $aggregatedFields[$name] = $value;
-                }
-                $repository->addField($field, $aggregatedFields);
-            }
+            $repository->addField($property, $data[$field]);
         }
     }
 }
