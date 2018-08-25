@@ -26,8 +26,6 @@ class RepoIdentifierDecoderTest extends TestCase
     {
         return [
             ['https://www.google.com/'],
-            ['https://github.com/KnpLabs/php-github-api'],
-            ['KnpLabs/php-github-api'],
             ['php-github-api'],
             ['myAwesomeRepository'],
             ['12'],

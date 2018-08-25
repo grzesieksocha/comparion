@@ -4,18 +4,18 @@ namespace App\Controller;
 
 use Psr\Log\InvalidArgumentException;
 
-use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\HttpFoundation\ParameterBag;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 
+use App\Service\JsonObjectSerializer;
+use App\Validator\RepoIdentifierDecoder;
 use App\Resource\Repository;
 use App\Criteria\PullCriteria;
 use App\Criteria\RepositoryCriteria;
 use App\Resource\ComparisonFactory;
-use App\Resource\RepositoryFactory;
+use App\Factory\RepositoryFactory;
 use App\Service\ApiDataRetriever;
 use App\Service\Fields;
 use App\Validator\ParametersResolver;
@@ -25,14 +25,24 @@ use App\Validator\ParametersResolver;
  */
 class RepositoryController
 {
-    use ContainerAwareTrait;
-
     /**
-     * @Route("/repository/{encodedIdentifier}", methods={"GET"}, name="get_repository")
+     * @Route("/repository/{encodedIdentifier}", methods={"GET"}, name="get_repository", requirements={"encodedIdentifier"=".+"})
      */
-    public function getRepositoryAction($encodedIdentifier)
+    public function getRepositoryAction(
+        $encodedIdentifier,
+        RepoIdentifierDecoder $repoIdentifierDecoder,
+        RepositoryFactory $repositoryFactory,
+        JsonObjectSerializer $jsonObjectSerializer)
     {
-        $this->container->get('app.repo_identifier_decoder')->decode($encodedIdentifier);
+        $repoIdentifier = $repoIdentifierDecoder->decode($encodedIdentifier);
+        if (false === $repoIdentifier) {
+            return $this->getBadRequestResponse('Invalid repository identifier (url encoded name / link required)');
+        }
+
+        $repository = $repositoryFactory->getRepository($repoIdentifier);
+        $serializedRepository = $jsonObjectSerializer->serialize($repository);
+
+        return $this->getSuccessResponse($serializedRepository);
     }
 
     /**
@@ -135,13 +145,10 @@ class RepositoryController
         return $response;
     }
 
-    /**
-     * @param mixed[] $result
-     */
-    private function getSuccessResponse(array $result): Response
+    private function getSuccessResponse(string $result): Response
     {
         $response = new Response();
-        $response->setContent(json_encode($result));
+        $response->setContent($result);
         $response->setStatusCode(Response::HTTP_OK);
         $response->headers->set('Content-Type', 'application/json');
 

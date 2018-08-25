@@ -1,12 +1,13 @@
 <?php
 
-namespace App\Resource;
+namespace App\Factory;
 
+use App\Resource\Repository;
 use App\Service\Fields;
 
 class RepositoryFactory
 {
-    public function getRepository($identifier)
+    public function getRepository(array $identifier)
     {
         return new Repository($identifier['owner'], $identifier['name']);
     }
