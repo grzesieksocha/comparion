@@ -46,3 +46,22 @@ services:
     app.repo_identifier_decoder:
         class: App\Validator\RepoIdentifierDecoder
 
+    app.repository_factory:
+        class: App\Factory\RepositoryFactory
+        public: true
+        arguments:
+            - '@app.repo_identifier_decoder'
+
+    app.comparison_factory:
+        class: App\Factory\ComparisonFactory
+        public: true
+
+    app.json_object_serializer:
+        class: App\Service\JsonObjectSerializer
+        public: true
+
+    app.api_data_retriever:
+        class: App\Service\ApiDataRetriever
+        public: true
+        arguments:
+            - '@app.github_api_caller'
