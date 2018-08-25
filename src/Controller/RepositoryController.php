@@ -46,11 +46,11 @@ class RepositoryController extends Controller
         $repositoryFactory = $this->container->get('app.repository_factory');
         $repositoryTwo = $repositoryFactory->getRepository($secondRepoIdentifier);
 
-        $comparisonFactory = $this->container->get('app.comparison_factory');
-        $comparison = $comparisonFactory->compare($repositoryOne, $repositoryTwo);
-
         $apiDataRetriever = $this->container->get('app.api_data_retriever');
         $apiDataRetriever->fill($repositoryTwo);
+
+        $comparisonFactory = $this->container->get('app.comparison_factory');
+        $comparison = $comparisonFactory->compare($repositoryOne, $repositoryTwo);
 
         $jsonObjectSerializer = $this->container->get('app.json_object_serializer');
         $serializedComparison = $jsonObjectSerializer->serialize($comparison);
